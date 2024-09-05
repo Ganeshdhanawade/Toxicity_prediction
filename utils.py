@@ -37,7 +37,21 @@ class utils:
 
         df = pd.DataFrame(res, columns=[f'B{i}' for i in range(1024)])
         return df
+    
+    @staticmethod
+    def ECFP4_2048(smiles):
+        res=[]
+        try:
+            mol = Chem.MolFromSmiles(smiles[0])
+            ecfp4_fingerprint = AllChem.GetMorganFingerprintAsBitVect(mol, 2, nBits=2048)
+            res.append(list(ecfp4_fingerprint))
+        except:
+            res.append(list(itertools.repeat(np.nan, 2048)))
 
+        df = pd.DataFrame(res, columns=[f'E_{i}' for i in range(2048)])
+        return df
+
+    #----------------------------------toxicity------------------------------
     # @staticmethod
     def SUMMARY_TABLE(df):
         df.replace('Not_calculate', np.nan, inplace=True)
@@ -67,7 +81,36 @@ class utils:
         
         return fin
     
-    
+   
+    #----------------------------------metabolism------------------------------
+    def SUMMARY_TABLE_METABOLISM(df):
+        df.replace('Not_calculate', np.nan, inplace=True)
+        data1 = df.copy()
+        data2=data1.iloc[:,1:]
+        data=data2.astype(float)
+
+        # Convert float values to binary using pd.cut
+        for column in data.columns[:]:
+            data[column] = data[column].apply(lambda x: 'Not_calculate' if pd.isna(x) else '0' if x <= 0.5 else '1')
+
+        #print(data)
+        # Creating summary table
+        s = pd.DataFrame()
+        for column in data.columns[:]:
+            s1 = data[column].value_counts().to_dict()
+            s = pd.concat([s, pd.DataFrame([s1], index=[column])])
+        
+        s.fillna(0, inplace=True)
+        fin = s.T
+        fin = fin.astype(int, errors='ignore')
+        fin.columns = data.columns[:]
+
+        # Creating index labels
+        fin.index = ['Not_calculate' if i == 'Not_calculate' else 'Inhibitor' if i == '1' else 'Non-Inhibitor' for i in fin.index]
+        fin = fin.reset_index(names='Class')
+        
+        return fin
+
 
     @staticmethod
     def LOAD_MODEL(model_folder, tox_name):

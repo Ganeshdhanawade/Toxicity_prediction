@@ -1,7 +1,8 @@
 from utils import utils
-from Evaluation import Evaluation
 import pandas as pd
 import numpy as np
+from Evaluation import Evaluation,Evaluation_metabolisum
+
 #------------------------------------------------------------------------------------#
 
 
@@ -36,6 +37,37 @@ def ALL_MODEL_PREDICTION(smi_list,dict):
     data_final=pd.DataFrame(np.array(data).T,columns=['SMILES']+list(dict.keys()))
     return data_final 
 
+#  ==================================== metabolisum Prediction ================================ #
+
+def ALL_MODEL_PREDICTION_METABOLISUM(smi_list,dict):
+    '''
+    Plase provide all information in smile list and dictionary formate
+    input-
+    smiles:they you want to calculate toxicity,
+    dict: contain the dataset about key:values pair of name and model about toxictiy
+    '''
+    data=[]
+    data.append(smi_list)
+    for k,l in zip(dict.keys(),dict.values()):
+        if str(k)=='CYP3A4_Inhibitor':
+            rdkit=Evaluation_metabolisum.CYP3A4_INHIBITOR_PREDICTION(smi_list,l)
+            data.append(rdkit)
+            continue
+        elif str(k)=='CYP2D6_Inhibitor': 
+            ecfp=Evaluation_metabolisum.CYP2D6_INHIBITOR_PREDICTION(smi_list,l)
+            data.append(ecfp)
+            continue
+        elif str(k)=='CYP2C9_Inhibitor':
+            rdkit=Evaluation_metabolisum.CYP2C9_INHIBITOR_PREDICTION(smi_list,l)
+            data.append(rdkit)
+            
+    data_final=pd.DataFrame(np.array(data).T,columns=['SMILES']+list(dict.keys()))
+    return data_final
+
+
+#-----------------------------------------------------------------------------#
+
+    #------------------------------------------------------------------------------------#
 
 #------------------------------------------------------------------------------------#
 

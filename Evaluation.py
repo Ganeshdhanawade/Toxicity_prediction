@@ -110,3 +110,70 @@ class Evaluation:
         return pred
     
     #---------------------------------------------------------------------------------#
+
+# ===================================== Metabolisum prediction ================================== #
+
+class Evaluation_metabolisum:
+    def __init__(self,smi,model):
+        self.smi=smi
+        self.model=model
+    
+    def CYP3A4_INHIBITOR_PREDICTION(smi,model):
+        pred=[]
+        for i in smi:
+            x=utils.RDKIT_DESCRIPTORS([i])
+
+            #Extract relavant feature
+            x.drop(columns=['AvgIpc'],inplace=True)   
+
+            if x.isnull().sum().sum()>=50:
+                pred.append(f'Not_calculate')
+                continue
+            ## Missing value handling
+            X_data = x.fillna(0)
+            if np.isnan(X_data).sum().sum()==0:
+                #booster = lgb.Booster(model_str=model)
+                pred.append(np.round(model.predict_proba(np.asarray(X_data))[0][1],2))     
+            else:
+                pred.append(f'Not_calculate')
+        return pred 
+        
+    
+    #-------------------------------------------------------------------------------#
+    def CYP2C9_INHIBITOR_PREDICTION(smi,model):
+        pred=[]
+        for i in smi:
+            x=utils.RDKIT_DESCRIPTORS([i])
+
+            #Extract relavant feature
+            x.drop(columns=['Ipc'],inplace=True)   #'AvgIpc'
+            
+            ##handle invalid smile
+            if x.isnull().sum().sum()>=50:
+                pred.append(f'Not_calculate')
+                continue
+            ## Missing value handling
+            X_data = x.fillna(0)
+
+            ##load model
+            model1,minmax_scaler=model
+            # Scale the features using the pre-trained scaler
+            scaled_features = minmax_scaler.transform(X_data)
+
+            if np.isnan(scaled_features).sum()==0:
+                #booster = lgb.Booster(model_str=model)
+                pred.append(np.round(model1.predict_proba(scaled_features)[0][1],2))     
+            else:
+                pred.append(f'Not_calculate')
+        return pred
+    
+    #------------------------------------------------------------------------------------#
+    def CYP2D6_INHIBITOR_PREDICTION(smi,model):
+        pred=[]
+        for i in smi:
+            x=utils.ECFP4_2048([i])
+            if x.isnull().sum().sum()==0:
+                pred.append(np.round(model.predict_proba(np.asarray(x))[0][1],2))
+            else:
+                pred.append('Not_calculate')
+        return pred
