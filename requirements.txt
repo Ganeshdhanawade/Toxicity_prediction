@@ -20,13 +20,14 @@ pytz==2024.1
 rdkit==2023.3.3
 rich==9.13.0
 scikit-learn==1.2.2
-scipy==1.13.1
+scipy==1.11.3
 SQLAlchemy==1.4.52
 tabulate==0.8.10
 threadpoolctl==3.5.0
-typing-extensions==3.10.0.2
+#typing-extensions==3.10.0.2
 tzdata==2024.1
 Werkzeug==3.0.3
 plotly
 streamlit
+xgboost==1.5.0
 
