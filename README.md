@@ -22,25 +22,36 @@ Future work will focus on expanding the toxicity prediction models to cover addi
   Pip install requrement.txt
 ```
 ```bash
-  Flask==1.1.1
-gunicorn==19.9.0
-itsdangerous==1.1.0
-Jinja2==2.10.1
-MarkupSafe==1.1.1
-Werkzeug==0.15.5
-numpy>=1.9.2
-scipy>=0.15.1
-scikit-learn>=0.18
-matplotlib>=1.4.3
-pandas>=0.19
+matplotlib
+blinker==1.8.2
+click==8.1.7
+click-aliases==1.0.1
+click-default-group==1.2.4
+click-help-colors==0.9.4
+colorama==0.4.6
+commonmark==0.9.1
+Flask==3.0.3
+greenlet==3.0.3
+itsdangerous==2.2.0
+Jinja2==3.1.4
+joblib==1.4.2
+lightgbm==4.3.0
+MarkupSafe==2.1.5
+numpy==1.26.4
+pandas==2.2.2
+pillow==10.3.0
+pytz==2024.1
+rdkit==2023.3.3
+rich==9.13.0
+scikit-learn==1.2.2
 
 ```
 ## Deployment
 
-To deploy this project on [render](https://dashboard.render.com/)
+To deploy this project on [render]([https://dashboard.render.com/](https://streamlit.io/))
 
 ```bash
-  npm run gunicorn app:app
+  app.py
 ```
 
 
