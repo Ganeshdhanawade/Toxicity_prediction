@@ -93,15 +93,6 @@ I am Completed post graduation in statistics with verious takenincal skills and 
 R, spss, Python, Flask, ML, DL, NLP, MLops, streamlit, docker, GenrativeAI, Render, MySQL, PowerBI, Excel etc.
 
 
-![Logo](https://camo.githubusercontent.com/3cdf9577401a2c7dceac655bbd37fb2f3ee273a457bf1f2169c602fb80ca56f8/68747470733a2f2f666f7274686562616467652e636f6d2f696d616765732f6261646765732f6d6164652d776974682d707974686f6e2e737667)
-![images](https://user-images.githubusercontent.com/109405138/209291383-14f3f225-e593-4b1b-a506-54db907bb433.png)
-![download](https://user-images.githubusercontent.com/109405138/209292205-98d13147-5a84-47d3-82eb-870197067abf.png)
-![Docker](https://www.docker.com/sites/default/files/d8/2019-07/vertical-logo-monochromatic.png)
-![Streamlit](https://streamlit.io/images/brand/streamlit-logo-secondary-colour.svg)
-![GitHub](https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png)
-
-
-
 ## Feedback
 
 If you have any feedback, please reach out to us at dhanawadeganesh386@gmail.com
