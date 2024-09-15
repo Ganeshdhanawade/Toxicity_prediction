@@ -59,7 +59,7 @@ To deploy this project on [Streamlit]([https://dashboard.render.com/](https://st
 
 Below is the domo for created application
 
-![New Project](demo.gif)
+![New Project](demo11.gif)
 
 
 ## Live demo
