@@ -1,15 +1,23 @@
 import numpy as np
 from utils import utils
 import pickle
-#-----------------------------------------------------------------------------#
+import streamlit as st
 
-## Missing value imputation - Hepatotoxicity
-model_MRLOW=pickle.load(open('models/hepeto_BCUT2D_MRLOW.pkl', 'rb'))  
-model_CHGLO=pickle.load(open('models/hepeto_BCUT2D_CHGLO.pkl', 'rb'))
+#------------------------preporcessing models--------------------------
+@st.cache_resource
+def MODEL_PREPROCESSING():
+    ## Missing value imputation - Hepatotoxicity
+    model_MRLOW=pickle.load(open('models/hepeto_BCUT2D_MRLOW.pkl', 'rb'))  
+    model_CHGLO=pickle.load(open('models/hepeto_BCUT2D_CHGLO.pkl', 'rb'))
 
-## Missing value imputation - Carditotoxicity
-cardio_KNN_IMPUTER=pickle.load(open('models/Cardio_knn_impute.pkl', 'rb'))  
-cardio_MINMAX_SCALER=pickle.load(open('models/Cardio_minmax_scaler.pkl', 'rb'))
+    ## Missing value imputation - Carditotoxicity
+    cardio_KNN_IMPUTER=pickle.load(open('models/Cardio_knn_impute.pkl', 'rb'))  
+    cardio_MINMAX_SCALER=pickle.load(open('models/Cardio_minmax_scaler.pkl', 'rb'))
+    return model_MRLOW, model_CHGLO, cardio_KNN_IMPUTER, cardio_MINMAX_SCALER
+
+#------------------------------load models---------------------------------------
+
+model_MRLOW, model_CHGLO, cardio_KNN_IMPUTER, cardio_MINMAX_SCALER = MODEL_PREPROCESSING()
 
 #-----------------------------------------------------------------------------#
 class Evaluation:

@@ -1,8 +1,30 @@
 import streamlit as st
 import time
+import pickle
 from utils import utils
 import plotly.express as px
 from main import ALL_MODEL_PREDICTION,ALL_MODEL_PREDICTION_METABOLISUM
+
+##-----------------------leading the models---------------------------
+
+@st.cache_resource
+def LOAD_TOX_MODELS():
+    dict={  'Hepatotoxicity': pickle.load(open('models/Hepatotoxicity.pkl', 'rb')),
+            'Mutagenicity': pickle.load(open('models/Mutagenicity.pkl', 'rb')),
+            'Cardiotoxicity': pickle.load(open('models/Cardiotoxicity.pkl', 'rb')),
+            'Carcinogenicity': pickle.load(open('models/Carcinogenicity.pkl', 'rb')),
+            'Nephrotoxicity': pickle.load(open('models/Nephrotoxicity.pkl', 'rb')),
+
+            'CYP3A4_Inhibitor': pickle.load(open('models/CYP3A4_Inhibitor.pkl', 'rb')),
+            'CYP2D6_Inhibitor': pickle.load(open('models/CYP2D6_Inhibitor.pkl', 'rb')),
+            'CYP2C9_Inhibitor': pickle.load(open('models/CYP2C9_Inhibitor.pkl', 'rb'))
+    }
+
+    return dict
+
+ # ----load-models----
+model_dict = LOAD_TOX_MODELS()
+
 #----------------------------------------------------------------------------#
 
 ###navigation pages
@@ -11,7 +33,7 @@ nav = st.sidebar.radio("Navigation",["Home","Toxicity","Metabolism"])
 #----------------------------------------------------------------------------#
 ###navigation page insite the home
 if nav == "Home":
-    st.title("Toxicity and Metabolisum Prediction") 
+    st.title("Toxicity and Metabolism Prediction") 
     ##insert image
     st.image("images/toxicity.jpg",width=500)
     ##subheader
@@ -70,8 +92,12 @@ if nav == "Toxicity":
     ## Button for prediction
     if st.button('Predict'):
         start_time = time.time()  # Start the timer
-        new_dict = utils.LOAD_MODEL('models', toxicity_name)
-        df = ALL_MODEL_PREDICTION(smi_list, new_dict)
+        #------------------------------------------------------triel------------------
+        #new_dict = utils.LOAD_MODEL('models', toxicity_name)
+        models = {key: model_dict[key] for key in toxicity_name if key in model_dict}
+        df = ALL_MODEL_PREDICTION(smi_list, models)
+        #df = ALL_MODEL_PREDICTION(smi_list, new_dict)
+        #--------------------------------------------------------------------
         end_time = time.time()  # End the timer
         elapsed_time = end_time - start_time  # Calculate elapsed time
 
@@ -112,9 +138,33 @@ if nav == "Toxicity":
             # Read a titanic.csv file from seaborn library
             unpivoted_df = summary.melt(id_vars='Class', var_name='Toxicity', value_name='values')
 
-            # who v/s fare barplot 
-            fig = px.bar(unpivoted_df, x="Toxicity", y="values", color="Class", barmode='group', title="Toxicity Prediction", text="values")
-            fig.update_layout(autosize=True, width=900, height=500, title_x=0.4) 
+            # # who v/s fare barplot 
+            # fig = px.bar(unpivoted_df, x="Toxicity", y="values", color="Class", barmode='group', title="Toxicity Prediction", text="values")
+            # fig.update_layout(autosize=True, width=900, height=500, title_x=0.4) 
+            # # Display the grouped bar plot in Streamlit
+            # st.plotly_chart(fig, use_container_width=True)
+
+            # Define the color map for toxicity prediction
+            color_map_toxicity = {
+                'Non-Toxic': '#28A745',        # Green for non-toxic compounds
+                'Toxic': '#FF0000',            # Bright red for toxic compounds
+                'Not_calculate': '#C0C0C0'      # Light gray for not assessed cases
+            }
+
+            # Create the bar plot with custom colors for toxicity
+            fig = px.bar(
+                unpivoted_df, 
+                x="Toxicity",            # Use "toxicity" for x-axis, ensuring it reflects the correct column
+                y="values", 
+                color="Class", 
+                barmode='group', 
+                title="Toxicity Prediction", 
+                text="values",
+                color_discrete_map=color_map_toxicity  # Custom color mapping for toxicity
+            )
+
+            # Update layout and display plot
+            fig.update_layout(autosize=True, width=900, height=500, title_x=0.4,xaxis_title="Toxicity prediction",yaxis_title="Values",legend_title="Class" )
             # Display the grouped bar plot in Streamlit
             st.plotly_chart(fig, use_container_width=True)
 
@@ -122,7 +172,7 @@ if nav == "Toxicity":
 
 if nav == "Metabolism":
 
-    st.title("Metabolisum Prediction") 
+    st.title("Metabolism Prediction") 
     ## Insert SMILES in text area
     text = st.text_area('Please Provide molecular SMILES')
     ### Convert SMILES into list
@@ -147,8 +197,11 @@ if nav == "Metabolism":
     ## Button for prediction
     if st.button('Predict'):
         start_time = time.time()  # Start the timer
-        new_dict = utils.LOAD_MODEL('models', metabolism_name)
-        df = ALL_MODEL_PREDICTION_METABOLISUM(smi_list, new_dict)
+        #---------------------------------------------------------
+        #new_dict = utils.LOAD_MODEL('models', metabolism_name)
+        models = {key: model_dict[key] for key in metabolism_name if key in model_dict}
+        df = ALL_MODEL_PREDICTION_METABOLISUM(smi_list, models)
+        #---------------------------------------------------------
         end_time = time.time()  # End the timer
         elapsed_time = end_time - start_time  # Calculate elapsed time
 
@@ -188,11 +241,34 @@ if nav == "Metabolism":
             st.markdown(""" ###### The graphical representation of model is:""")  
             # Read a titanic.csv file from seaborn library
             unpivoted_df = summary.melt(id_vars='Class', var_name='metabolism', value_name='values')
+            
+            # ----------code for plot --------
+            # # who v/s fare barplot 
+            # fig = px.bar(unpivoted_df, x="metabolism", y="values", color="Class", barmode='group', title="Metabolism Prediction", text="values")
+            # fig.update_layout(autosize=True, width=900, height=500, title_x=0.4) 
+            # # Display the grouped bar plot in Streamlit
+            # st.plotly_chart(fig, use_container_width=True)
 
-            # who v/s fare barplot 
-            fig = px.bar(unpivoted_df, x="metabolism", y="values", color="Class", barmode='group', title="Metabolism Prediction", text="values")
-            fig.update_layout(autosize=True, width=900, height=500, title_x=0.4) 
-            # Display the grouped bar plot in Streamlit
+            color_map = {
+                'Non-Inhibitor':  '#28A745',   # Green for non-toxic
+                'Inhibitor': '#FF0000',        # Bright red for toxic
+                'Not_calculate': '#C0C0C0'    # Light gray for not calculated
+            }
+
+            # Create the bar plot with custom colors
+            fig = px.bar(
+                unpivoted_df, 
+                x="metabolism", 
+                y="values", 
+                color="Class", 
+                barmode='group', 
+                title="Metabolism Prediction", 
+                text="values",
+                color_discrete_map=color_map  # Custom color mapping
+            )
+
+            # Update layout and display plot
+            fig.update_layout(autosize=True, width=900, height=500, title_x=0.4)
             st.plotly_chart(fig, use_container_width=True)
 
 
