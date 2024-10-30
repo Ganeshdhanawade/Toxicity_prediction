@@ -47,10 +47,17 @@ class Evaluation:
                 pred_lo=model_CHGLO.predict(x[para_chglo])
                 x['BCUT2D_CHGLO']=pred_lo
                 x['BCUT2D_MRLOW']=pred_low
+<<<<<<< HEAD
                 try:  #handle that condition
                     pred.append(model.predict_proba(np.round(np.asarray(x))[0][1],2)) 
                 except:    
                     pred.append('Not_calculate')    
+=======
+                try: ##handle that condition
+                    pred.append(model.predict_proba(np.round(np.asarray(x))[0][1],2))
+                except:
+                    pred.append('Not_calculate')
+>>>>>>> 84c0fd351e14ac300c31659ae5cb632b8a9ad125
             else:
                 pred.append(f'Not_calculate')
         return pred

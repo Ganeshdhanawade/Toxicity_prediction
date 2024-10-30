@@ -250,6 +250,16 @@ if nav == "Metabolism":
             # # Display the grouped bar plot in Streamlit
             # st.plotly_chart(fig, use_container_width=True)
 
+<<<<<<< HEAD
+=======
+            # ----------code for plot --------
+            # # who v/s fare barplot 
+            # fig = px.bar(unpivoted_df, x="metabolism", y="values", color="Class", barmode='group', title="Metabolism Prediction", text="values")
+            # fig.update_layout(autosize=True, width=900, height=500, title_x=0.4) 
+            # # Display the grouped bar plot in Streamlit
+            # st.plotly_chart(fig, use_container_width=True)
+
+>>>>>>> 84c0fd351e14ac300c31659ae5cb632b8a9ad125
             color_map = {
                 'Non-Inhibitor':  '#28A745',   # Green for non-toxic
                 'Inhibitor': '#FF0000',        # Bright red for toxic
@@ -270,6 +280,7 @@ if nav == "Metabolism":
 
             # Update layout and display plot
             fig.update_layout(autosize=True, width=900, height=500, title_x=0.4)
+<<<<<<< HEAD
             st.plotly_chart(fig, use_container_width=True)
 
 
@@ -417,6 +428,8 @@ if nav == "Combine":
             # Update layout and display plot
             fig.update_layout(autosize=True, width=900, height=500, title_x=0.4,xaxis_title="METTOX prediction",yaxis_title="Values",legend_title="Class" )
             # Display the grouped bar plot in Streamlit
+=======
+>>>>>>> 84c0fd351e14ac300c31659ae5cb632b8a9ad125
             st.plotly_chart(fig, use_container_width=True)
 
 
