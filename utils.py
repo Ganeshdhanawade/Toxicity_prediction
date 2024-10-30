@@ -110,6 +110,35 @@ class utils:
         fin = fin.reset_index(names='Class')
         
         return fin
+    
+    #----------------------------------metabolism------------------------------
+    def SUMMARY_TABLE_METTOX(df):
+        df.replace('Not_calculate', np.nan, inplace=True)
+        data1 = df.copy()
+        data2=data1.iloc[:,1:]
+        data=data2.astype(float)
+
+        # Convert float values to binary using pd.cut
+        for column in data.columns[:]:
+            data[column] = data[column].apply(lambda x: 'Not_calculate' if pd.isna(x) else '0' if x <= 0.5 else '1')
+
+        #print(data)
+        # Creating summary table
+        s = pd.DataFrame()
+        for column in data.columns[:]:
+            s1 = data[column].value_counts().to_dict()
+            s = pd.concat([s, pd.DataFrame([s1], index=[column])])
+        
+        s.fillna(0, inplace=True)
+        fin = s.T
+        fin = fin.astype(int, errors='ignore')
+        fin.columns = data.columns[:]
+
+        # Creating index labels
+        fin.index = ['Not_calculate' if i == 'Not_calculate' else 'Toxic/Inhibitor' if i == '1' else 'Non-Toxic/Non-Inhibitor' for i in fin.index]
+        fin = fin.reset_index(names='Class')
+        
+        return fin
 
 
     @staticmethod

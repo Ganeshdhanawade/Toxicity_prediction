@@ -1,4 +1,5 @@
 import streamlit as st
+import pandas as pd
 import time
 import pickle
 from utils import utils
@@ -28,7 +29,7 @@ model_dict = LOAD_TOX_MODELS()
 #----------------------------------------------------------------------------#
 
 ###navigation pages
-nav = st.sidebar.radio("Navigation",["Home","Toxicity","Metabolism"])
+nav = st.sidebar.radio("Navigation",["Home","Toxicity","Metabolism","Combine"])
 
 #----------------------------------------------------------------------------#
 ###navigation page insite the home
@@ -269,6 +270,153 @@ if nav == "Metabolism":
 
             # Update layout and display plot
             fig.update_layout(autosize=True, width=900, height=500, title_x=0.4)
+            st.plotly_chart(fig, use_container_width=True)
+
+
+### ============================================== combine_both ===================================================== ##
+
+
+if nav == "Combine":
+
+    st.title("METTOX Prediction") 
+    ## Insert SMILES in text area
+    text = st.text_area('Please Provide molecular SMILES')
+    ### Convert SMILES into list
+    smi_list = list(str(num) for num in text.strip().split())
+    ### Create the checkbox of each hepatotoxicity
+    st.sidebar.subheader('METTOX:')
+    hepatotoxicity = st.sidebar.checkbox('Hepatotoxicity')
+    mutagenicity = st.sidebar.checkbox('Mutagenicity')
+    cardiotoxicity = st.sidebar.checkbox('Cardiotoxicity')
+    carcinogenicity = st.sidebar.checkbox('Carcinogenicity')
+    nephrotoxicity = st.sidebar.checkbox('Nephrotoxicity')
+    CYP3A4_Inhibitor = st.sidebar.checkbox('CYP3A4_Inhibitor')
+    CYP2D6_Inhibitor = st.sidebar.checkbox('CYP2D6_Inhibitor')
+    CYP2C9_Inhibitor = st.sidebar.checkbox('CYP2C9_Inhibitor')
+    # neurotoxicity = st.sidebar.checkbox('Neurotoxicity')
+    
+    ### Store the toxicity values inside the list
+    TOX_name = []
+    MET_name = []
+    if hepatotoxicity:
+        TOX_name.append('Hepatotoxicity')
+    if mutagenicity:
+        TOX_name.append('Mutagenicity')
+    if carcinogenicity:
+        TOX_name.append('Carcinogenicity')
+    if cardiotoxicity:
+        TOX_name.append('Cardiotoxicity')
+    if nephrotoxicity:
+        TOX_name.append('Nephrotoxicity')
+    if CYP3A4_Inhibitor:
+        MET_name.append('CYP3A4_Inhibitor')
+    if CYP2D6_Inhibitor:
+        MET_name.append('CYP2D6_Inhibitor')
+    if CYP2C9_Inhibitor:
+        MET_name.append('CYP2C9_Inhibitor')
+
+    ## Button for prediction
+    if st.button('Predict'):
+        start_time = time.time()  # Start the timer
+        #------------------------------------------------------triel-----------------
+        TOX_models = {key: model_dict[key] for key in TOX_name if key in model_dict}
+        MET_models = {key: model_dict[key] for key in MET_name if key in model_dict}
+
+        MET_df = ALL_MODEL_PREDICTION_METABOLISUM(smi_list, MET_models)
+        TOX_df = ALL_MODEL_PREDICTION(smi_list, TOX_models)
+
+        # Drop 'SMILES' column from MET_df if it exists
+        if 'SMILES' in MET_df.columns:
+            MET_df.drop(columns='SMILES', inplace=True)
+
+        # Combine both DataFrames with error handling
+        if not TOX_df.empty and not MET_df.empty:
+            # Both DataFrames have data
+            df = pd.concat([TOX_df, MET_df], axis=1)
+        elif not TOX_df.empty:
+            # Only Toxicity DataFrame has data
+            df = TOX_df
+            st.warning("Metabolism predictions are not available.")
+        elif not MET_df.empty:
+            # Only Metabolism DataFrame has data
+            df = MET_df
+            st.warning("Toxicity predictions are not available.")
+        else:
+            # Both DataFrames are empty
+            df = pd.DataFrame()
+            st.error("No predictions were made for either Toxicity or Metabolism.")
+
+        #--------------------------------------------------------------------
+        end_time = time.time()  # End the timer
+        elapsed_time = end_time - start_time  # Calculate elapsed time
+
+        ## Progress bar
+        bar = st.progress(50)
+        time.sleep(3)
+        bar.progress(100)
+
+        print(TOX_name)
+
+        if len(TOX_name) == 0 and len(MET_name) == 0:
+            st.error('Please select at least one toxicity or metabolism')
+        else:
+            ## Display elapsed time
+            st.markdown(f"**Model prediction time:** {elapsed_time:.2f} seconds")
+
+            ## Show df in tables
+            st.table(df.head(10))
+            
+            ## Set download option
+            col1, col2, col3 = st.columns([2, 1, 1])
+            with col3:
+                csv = df.to_csv(index=False)
+                st.download_button(
+                    label="Download",
+                    data=csv,
+                    file_name='data.csv',
+                    mime='text/csv',
+                )
+                
+            ## Insert the space of model    
+            st.markdown(""" """)
+            st.markdown(""" **Below Table shows the summarized report of METTOX:**""")
+            ## Summarization of 
+            summary = utils.SUMMARY_TABLE_METTOX(df)
+            st.table(summary) 
+
+            st.markdown(""" """) 
+            st.markdown(""" ###### The graphical representation of model is:""")  
+            # Read a titanic.csv file from seaborn library
+            unpivoted_df = summary.melt(id_vars='Class', var_name='Toxicity', value_name='values')
+
+            # # who v/s fare barplot 
+            # fig = px.bar(unpivoted_df, x="Toxicity", y="values", color="Class", barmode='group', title="Toxicity Prediction", text="values")
+            # fig.update_layout(autosize=True, width=900, height=500, title_x=0.4) 
+            # # Display the grouped bar plot in Streamlit
+            # st.plotly_chart(fig, use_container_width=True)
+
+            # Define the color map for toxicity prediction
+            color_map_toxicity = {
+                'Non-Toxic': '#28A745',        # Green for non-toxic compounds
+                'Toxic': '#FF0000',            # Bright red for toxic compounds
+                'Not_calculate': '#C0C0C0'      # Light gray for not assessed cases
+            }
+
+            # Create the bar plot with custom colors for toxicity
+            fig = px.bar(
+                unpivoted_df, 
+                x="Toxicity",            # Use "toxicity" for x-axis, ensuring it reflects the correct column
+                y="values", 
+                color="Class", 
+                barmode='group', 
+                title="METTOX Prediction", 
+                text="values",
+                color_discrete_map=color_map_toxicity  # Custom color mapping for toxicity
+            )
+
+            # Update layout and display plot
+            fig.update_layout(autosize=True, width=900, height=500, title_x=0.4,xaxis_title="METTOX prediction",yaxis_title="Values",legend_title="Class" )
+            # Display the grouped bar plot in Streamlit
             st.plotly_chart(fig, use_container_width=True)
 
 
